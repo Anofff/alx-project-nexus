@@ -1,23 +1,34 @@
-from base import BASE_DIR
-import environ
 import os
+import environ
+
+from .base import BASE_DIR
 
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+env.read_env(os.path.join(BASE_DIR, ".env"))
 
-DEBUG = True
+# Debug mode
+DEBUG = env.bool("DJANGO_DEBUG", default=True)
+
+# Secret key
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = ["*"]
 
-# PostgreSQL for local development
+# PostgreSQL for Docker local development
 DATABASES = {
-    "default": env.db(
-        "DATABASE_URL",
-        default=f"postgres://{env('DB_USER', default='postgres')}:{env('DB_PASSWORD', default='postgres')}@{env('DB_HOST', default='127.0.0.1')}:{env('DB_PORT', default='5432')}/{env('DB_NAME', default='ecommerce_db')}"
-    )
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("POSTGRES_HOST"),
+        "PORT": env("POSTGRES_PORT"),
+    }
 }
 
 # Static & Media (local)
-STATIC_URL = "static/"
-MEDIA_URL = "media/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
